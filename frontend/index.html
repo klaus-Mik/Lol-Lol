@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GCP Fullstack CI/CD Demo</title>
+  <style>
+    body { font-family: system-ui, sans-serif; background: #0b0b0b; color: #f5f5f5; max-width: 600px; margin: 3rem auto; padding: 0 1rem; }
+    h1 { color: #eab308; border-bottom: 1px solid #2a2a2a; padding-bottom: 0.5rem; }
+    .box { background: #161616; border: 1px solid #2b2b2b; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; }
+    .row { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
+    input { flex: 1; padding: 0.6rem; border-radius: 6px; border: 1px solid #3f3f46; background: #09090b; color: #fff; }
+    button { padding: 0.6rem 1.1rem; border-radius: 6px; border: none; background: #eab308; color: #09090b; font-weight: 600; cursor: pointer; }
+    li { padding: 0.45rem 0; border-bottom: 1px solid #262626; }
+  </style>
+</head>
+<body>
+  <h1>GCP Cloud + Docker + Terraform</h1>
+  <div class="box">API Health: <strong id="health">Checking...</strong></div>
+  <div class="row">
+    <input id="noteInput" placeholder="Type a note..." />
+    <button onclick="saveNote()">Add</button>
+  </div>
+  <div class="box">
+    <ul id="notes"></ul>
+  </div>
+  <script>
+    async function refresh() {
+      const h = await fetch('/api/health').then(r => r.json());
+      document.getElementById('health').textContent = `${h.status} (${h.env})`;
+      const d = await fetch('/api/notes').then(r => r.json());
+      document.getElementById('notes').innerHTML = d.notes.map(n => `<li>#${n.id} — ${n.note}</li>`).join('');
+    }
+    async function saveNote() {
+      const el = document.getElementById('noteInput');
+      if (!el.value.trim()) return;
+      await fetch('/api/notes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ note: el.value })
+      });
+      el.value = '';
+      refresh();
+    }
+    refresh();
+  </script>
+</body>
+</html>
