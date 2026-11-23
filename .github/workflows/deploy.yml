@@ -23,6 +23,8 @@ jobs:
           pip install -r backend/requirements.txt
 
       - name: Verify FastAPI routes
+        env:
+          PYTHONPATH: .
         run: |
           python -c "from fastapi.testclient import TestClient; from backend.main import app; client = TestClient(app); r = client.get('/api/health'); assert r.status_code == 200 and r.json()['status'] == 'ok'; n = client.get('/api/notes'); assert n.status_code == 200 and len(n.json()['notes']) >= 2; print('API checks passed')"
 
